@@ -1,12 +1,9 @@
 ﻿using DataContextForPMS;
 using Microsoft.EntityFrameworkCore;
 using ModelForPMS;
-using Project_Management_System.Repositories.Interfaces;
 using RepositoriesForPMS.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace Project_Management_System.Repositories.Implementations
+namespace RepositoriesForPMS.Implementations
 {
     public class ClientRepository : IClientRepository
     {
@@ -17,14 +14,14 @@ namespace Project_Management_System.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<IEnumerable<Client>> GetAllClientsAsync()
+        public async Task<IEnumerable<Client>> GetAllAsync()
         {
             return await _context.Clients
                 .Include(c => c.Projects)
                 .ToListAsync();
         }
 
-        public async Task<Client?> GetClientByIdAsync(int id)
+        public async Task<Client?> GetByIdAsync(int id)
         {
             return await _context.Clients
                 .Include(c => c.Projects)

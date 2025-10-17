@@ -15,6 +15,7 @@ namespace ModelForPMS
         public string ClientName { get; set; }
         public string Email { get; set; }
 
+        [JsonIgnore]
         public ICollection<Project>? Projects { get; set; }
     }
 }

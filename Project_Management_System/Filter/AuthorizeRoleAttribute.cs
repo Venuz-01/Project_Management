@@ -18,10 +18,9 @@ namespace Project_Management_System.Filter
 
             if (string.IsNullOrEmpty(userRole) || !userRole.Equals(_role, StringComparison.OrdinalIgnoreCase))
             {
-                context.Result = new ForbidResult();
+                // Replace ForbidResult() with a simple 403 StatusCodeResult
+                context.Result = new StatusCodeResult(403); // Forbidden
             }
         }
-
     }
 }
-

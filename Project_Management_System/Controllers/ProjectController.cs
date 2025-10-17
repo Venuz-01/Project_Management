@@ -1,8 +1,6 @@
-﻿using DataContextForPMS;
+﻿using Microsoft.AspNetCore.Mvc;
 using ModelForPMS;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Build.Evaluation;
-using Microsoft.EntityFrameworkCore;
+using RepositoriesForPMS.Interfaces;
 
 namespace Project_Management_System.Controllers
 {
@@ -10,89 +8,55 @@ namespace Project_Management_System.Controllers
     [ApiController]
     public class ProjectController : ControllerBase
     {
+        private readonly IProjectRepository _projectRepository;
 
-        private readonly PMSAppDBContext _context;
-
-        public ProjectController(PMSAppDBContext context)
+        public ProjectController(IProjectRepository projectRepository)
         {
-            _context = context;
+            _projectRepository = projectRepository;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ModelForPMS.Project>>> GetProjects()
+        public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
-            return await _context.Projects
-                .Include(p => p.Client)
-                .Include(p => p.ProjectAssignments)
-                    .ThenInclude(pa => pa.Employee)
-                .ToListAsync();
+            var projects = await _projectRepository.GetAllAsync();
+            return Ok(projects);
         }
 
         [HttpGet("{id}")]
-
-        public async Task<ActionResult<ModelForPMS.Project>> GetProject(int id)
+        public async Task<ActionResult<Project>> GetProject(int id)
         {
-            var project = await _context.Projects
-                .Include(p => p.Client)
-                .Include(p => p.ProjectAssignments)
-                     .ThenInclude(pa => pa.Employee)
-                .FirstOrDefaultAsync(p => p.ProjectId == id);
-            return project == null ? NotFound() : Ok(project);
+            var project = await _projectRepository.GetByIdAsync(id);
+            if (project == null)
+                return NotFound();
 
+            return Ok(project);
         }
 
         [HttpPost]
-
-        public async Task<ActionResult<ModelForPMS.Project>> CreateProject(ModelForPMS.Project project)
+        public async Task<ActionResult<Project>> CreateProject(Project project)
         {
-            _context.Projects.Add(project);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetProject), new { id = project.ProjectId }, project);
+            var created = await _projectRepository.AddAsync(project);
+            return CreatedAtAction(nameof(GetProject), new { id = created.ProjectId }, created);
         }
 
-        [HttpPut("id")]
-
-        public async Task<IActionResult> UpdateProject(int id, ModelForPMS.Project project)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProject(int id, Project project)
         {
-            if (id != project.ProjectId)
-            {
-                return BadRequest();
-            }
-            _context.Entry(project).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Projects.Any(e => e.ProjectId == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return Ok("Project Updated Succesfully");
-        }
+            var updated = await _projectRepository.UpdateAsync(id, project);
+            if (updated == null)
+                return NotFound();
 
+            return Ok("Project Updated Successfully");
+        }
 
         [HttpDelete("{id}")]
-
         public async Task<IActionResult> DeleteProject(int id)
         {
-            var project = await _context.Projects.FindAsync(id);
-            if (project == null)
-            {
+            var result = await _projectRepository.DeleteAsync(id);
+            if (!result)
                 return NotFound();
-            }
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
+
             return Ok("Deleted Successfully");
         }
-
-
-
     }
 }
