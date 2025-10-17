@@ -15,15 +15,16 @@ namespace ModelForPMS
         public int ProjectId { get; set; }
         public string ProjectName { get; set; }
         public int ClientId { get; set; }
-        [ForeignKey("ClientId")]
-        public Client Client { get; set; }
+
+        [JsonIgnore]
+        public Client? Client { get; set; }
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal? DailyRate { get; set; }
 
         [JsonIgnore]
-        public ICollection<ProjectAssignment> ProjectAssignments { get; set; }
+        public ICollection<ProjectAssignment>? ProjectAssignments { get; set; }
 
 
     }

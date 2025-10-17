@@ -1,0 +1,52 @@
+﻿using DataContextForPMS;
+using Microsoft.EntityFrameworkCore;
+using ModelForPMS;
+using Project_Management_System.Repositories.Interfaces;
+using RepositoriesForPMS.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Project_Management_System.Repositories.Implementations
+{
+    public class ClientRepository : IClientRepository
+    {
+        private readonly PMSAppDBContext _context;
+
+        public ClientRepository(PMSAppDBContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Client>> GetAllClientsAsync()
+        {
+            return await _context.Clients
+                .Include(c => c.Projects)
+                .ToListAsync();
+        }
+
+        public async Task<Client?> GetClientByIdAsync(int id)
+        {
+            return await _context.Clients
+                .Include(c => c.Projects)
+                .FirstOrDefaultAsync(c => c.ClientId == id);
+        }
+
+        public async Task<Client> AddClientAsync(Client client)
+        {
+            _context.Clients.Add(client);
+            await _context.SaveChangesAsync();
+            return client;
+        }
+
+        public async Task<bool> DeleteClientAsync(int id)
+        {
+            var client = await _context.Clients.FindAsync(id);
+            if (client == null)
+                return false;
+
+            _context.Clients.Remove(client);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+    }
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ModelForPMS
@@ -10,11 +11,10 @@ namespace ModelForPMS
     public class Client
     {
         [Key]
-
-        public int Index { get; set; }
         public int ClientId { get; set; }
         public string ClientName { get; set; }
         public string Email { get; set; }
-        public ICollection<Project> Projects { get; set; }
+
+        public ICollection<Project>? Projects { get; set; }
     }
 }
