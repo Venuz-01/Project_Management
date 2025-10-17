@@ -10,6 +10,8 @@ namespace ModelForPMS
     public class Client
     {
         [Key]
+
+        public int Index { get; set; }
         public int ClientId { get; set; }
         public string ClientName { get; set; }
         public string Email { get; set; }

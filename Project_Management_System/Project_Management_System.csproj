@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="iTextSharp" Version="5.5.13.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
@@ -25,11 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DataContextForPMS\DataContextForPMS.csproj" />
+    <ProjectReference Include="..\ModelForPMS\ModelForPMS.csproj" />
+    <ProjectReference Include="..\RepositoriesForPMS\RepositoriesForPMS.csproj" />
   </ItemGroup>
 
 </Project>

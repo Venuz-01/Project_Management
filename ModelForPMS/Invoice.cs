@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,8 +9,8 @@ namespace ModelForPMS
 {
     public class Invoice
     {
-       
-            public int Invoice_Id { get; set; }
+        [Key]
+        public int Invoice_Id { get; set; }
             public int EmployeeId { get; set; }
             public Employee Employee { get; set; }
             public int ProjectId { get; set; }
