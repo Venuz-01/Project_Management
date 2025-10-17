@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataContextForPMS.Migrations
 {
     [DbContext(typeof(PMSAppDBContext))]
-    [Migration("20251016154231_firstmig")]
-    partial class firstmig
+    [Migration("20251017043349_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,14 @@ namespace DataContextForPMS.Migrations
 
             modelBuilder.Entity("ModelForPMS.Client", b =>
                 {
-                    b.Property<int>("ClientId")
+                    b.Property<int>("Index")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ClientId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Index"));
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ClientName")
                         .IsRequired()
@@ -41,12 +44,12 @@ namespace DataContextForPMS.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("ClientId");
+                    b.HasKey("Index");
 
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("ModelForPMS.Leave", b =>
+            modelBuilder.Entity("ModelForPMS.Employee", b =>
                 {
                     b.Property<int>("EmployeeId")
                         .ValueGeneratedOnAdd()
@@ -137,8 +140,8 @@ namespace DataContextForPMS.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("LeaveType")
                         .IsRequired()
@@ -152,13 +155,8 @@ namespace DataContextForPMS.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<DateTime>("ToDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("ToDate")
+                        .HasColumnType("date");
 
                     b.HasKey("LeaveId");
 
@@ -292,7 +290,7 @@ namespace DataContextForPMS.Migrations
 
             modelBuilder.Entity("ModelForPMS.EmployeeRole", b =>
                 {
-                    b.HasOne("ModelForPMS.Leave", "Leave")
+                    b.HasOne("ModelForPMS.Employee", "Employee")
                         .WithMany("EmployeeRoles")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -304,14 +302,14 @@ namespace DataContextForPMS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Leave");
+                    b.Navigation("Employee");
 
                     b.Navigation("Role");
                 });
 
             modelBuilder.Entity("ModelForPMS.Invoice", b =>
                 {
-                    b.HasOne("ModelForPMS.Leave", "Leave")
+                    b.HasOne("ModelForPMS.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -323,14 +321,14 @@ namespace DataContextForPMS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Leave");
+                    b.Navigation("Employee");
 
                     b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ModelForPMS.Leave", b =>
                 {
-                    b.HasOne("ModelForPMS.Leave", "Leave")
+                    b.HasOne("ModelForPMS.Employee", "Employee")
                         .WithMany("Leaves")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,7 +338,7 @@ namespace DataContextForPMS.Migrations
                         .WithMany()
                         .HasForeignKey("ProjectId");
 
-                    b.Navigation("Leave");
+                    b.Navigation("Employee");
 
                     b.Navigation("Project");
                 });
@@ -358,7 +356,7 @@ namespace DataContextForPMS.Migrations
 
             modelBuilder.Entity("ModelForPMS.ProjectAssignment", b =>
                 {
-                    b.HasOne("ModelForPMS.Leave", "Leave")
+                    b.HasOne("ModelForPMS.Employee", "Employee")
                         .WithMany("ProjectAssignments")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -376,7 +374,7 @@ namespace DataContextForPMS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Leave");
+                    b.Navigation("Employee");
 
                     b.Navigation("Project");
 
@@ -388,7 +386,7 @@ namespace DataContextForPMS.Migrations
                     b.Navigation("Projects");
                 });
 
-            modelBuilder.Entity("ModelForPMS.Leave", b =>
+            modelBuilder.Entity("ModelForPMS.Employee", b =>
                 {
                     b.Navigation("EmployeeRoles");
 

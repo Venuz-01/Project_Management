@@ -15,6 +15,8 @@ builder.Services.AddDbContext<PMSAppDBContext>(options =>
 
 
 builder.Services.AddScoped<IHRrepository, HRrepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 
 

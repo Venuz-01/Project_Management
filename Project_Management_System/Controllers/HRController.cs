@@ -1,12 +1,14 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using ModelForPMS;
+using Project_Management_System.Filter;
 using RepositoriesForPMS.Interfaces;
 
 namespace Project_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeRole("HR Manager")]
     public class HRController : ControllerBase
     {
         private readonly IHRrepository _repository;
