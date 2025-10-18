@@ -20,18 +20,21 @@ namespace RepositoriesForPMS.Implementations
         }
 
         // CREATE
-       
+
 
         public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
         {
-        // Includes are often omitted for simple DTO mapping, but added here for completeness
-            return await _context.Employees
-                             .ToListAsync();
+            // Includes are often omitted for simple DTO mapping, but added here for completeness
+            return await _context.Employees.Include(s => s.Roles)
+            .OrderBy(e => e.EmployeeId)
+            .ToListAsync();
         }
 
         public async Task<Employee> GetEmployeeByIdAsync(int employeeId)
         {
-            return await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+            return await _context.Employees
+                .Include(s => s.Roles)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
         }
 
         public async Task AddEmployeeAsync(Employee employee)
@@ -45,10 +48,10 @@ namespace RepositoriesForPMS.Implementations
             var employee = await _context.Employees.FindAsync(employeeId);
             if (employee != null)
             {
-            _context.Employees.Remove(employee);
-             await _context.SaveChangesAsync();
+                _context.Employees.Remove(employee);
+                await _context.SaveChangesAsync();
             }
-        }   
+        }
 
         public async Task<bool> EmployeeExistsAsync(int employeeId)
         {
@@ -61,10 +64,51 @@ namespace RepositoriesForPMS.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public  async Task AddLeaveAsync(Leave leave)
+        public async Task AddLeaveAsync(Leave leave)
         {
             await _context.Leaves.AddAsync(leave);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteLeaveAsync(int employeeId)
+        {
+            var leave = await _context.Leaves.Where(l => l.EmployeeId == employeeId)
+            .OrderByDescending(l => l.LeaveId) // Sorts latest to earliest
+            .FirstOrDefaultAsync();
+            if (leave != null)
+            {
+                _context.Leaves.Remove(leave);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateLeaveAsync(Leave leave)
+        {
+            _context.Entry(leave).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Leave>> GetAllLeavesAsync()
+        {
+            return await _context.Leaves
+                             .ToListAsync();
+        }
+
+        public async Task<List<Leave>> GetAllLeavesWithEmployeeIDAsync(int EmployeeId)
+        {
+            // The Where method filters the collection to include only leaves 
+            // where the EmployeeId matches the input 'id'.
+            return await _context.Leaves
+                                 .Where(s => s.EmployeeId == EmployeeId)
+                                 .ToListAsync();
+        }
+
+        public async Task<int> GetAllLeavesCountWithEmployeeIDAsync(int EmployeeId)
+        {
+            return await _context.Leaves
+                             .Where(s => s.EmployeeId == EmployeeId)
+                             .CountAsync();
+        }
     }
 }
+

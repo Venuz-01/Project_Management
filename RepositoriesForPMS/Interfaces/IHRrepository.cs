@@ -25,7 +25,16 @@ namespace RepositoriesForPMS.Interfaces
         // Utility: Check if an employee exists
         Task<bool> EmployeeExistsAsync(int employeeId);
 
+        Task<IEnumerable<Leave>> GetAllLeavesAsync();
+
         Task AddLeaveAsync(Leave leave);
 
+        Task DeleteLeaveAsync(int employeeId);
+
+        Task UpdateLeaveAsync(Leave leave);
+
+        Task<List<Leave>> GetAllLeavesWithEmployeeIDAsync(int EmployeeId);
+
+        Task<int> GetAllLeavesCountWithEmployeeIDAsync(int EmployeeId);
     }
 }

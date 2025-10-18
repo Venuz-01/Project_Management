@@ -28,6 +28,8 @@ namespace DataContextForPMS
 
         public DbSet<Client> Clients { get; set; }
 
+        public DbSet<Holiday> Holidays { get; set; }
+
 
     }
 }

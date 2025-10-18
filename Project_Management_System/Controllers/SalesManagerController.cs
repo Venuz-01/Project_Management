@@ -8,7 +8,7 @@ namespace Project_Management_System.Controllers
     [Route("api/[controller]")]
     [ApiController]
 
-    [AuthorizeRole("Sales Manager")]
+    //[AuthorizeRole("Sales Manager")]
     public class SalesManagerController : ControllerBase
     {
         private readonly IClientRepository _clientRepository;

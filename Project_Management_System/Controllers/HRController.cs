@@ -8,7 +8,6 @@ namespace Project_Management_System.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeRole("HR Manager")]
     public class HRController : ControllerBase
     {
         private readonly IHRrepository _repository;
@@ -40,13 +39,13 @@ namespace Project_Management_System.Controllers
             return CreatedAtAction(nameof(GetById), new { id = employee.EmployeeId }, employee);
         }
         // DELETE: api/Employee/5
-        [HttpDelete("{id}")]
+        [HttpDelete("Employee/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             await _repository.DeleteEmployeeAsync(id);
             return NoContent();
         }
-        [HttpPut("{id}")]
+        [HttpPut("Employee/{id}")]
         public async Task<IActionResult> Update(int id, Employee employee)
         {
             if (id != employee.EmployeeId) return BadRequest();
@@ -54,12 +53,45 @@ namespace Project_Management_System.Controllers
             return NoContent();
         }
 
-        [HttpPost("leave")]
+        [HttpGet("leave")]
+        public async Task<IActionResult> GetAllLeaves() => Ok(await _repository.GetAllLeavesAsync());
 
+        [HttpGet("leave/{EmployeeId}")]
+        public async Task<IActionResult> GetLeavesByEmployeeId(int EmployeeId)
+        {
+            var leave = await _repository.GetAllLeavesWithEmployeeIDAsync(EmployeeId);
+            if (leave == null) return NotFound();
+            return Ok(leave);
+        }
+
+
+        [HttpGet("leave/{EmployeeId}/count")]
+        public async Task<IActionResult> GetLeavesCountByEmployeeId(int EmployeeId)
+        {
+            var leave = await _repository.GetAllLeavesCountWithEmployeeIDAsync(EmployeeId);
+            if (leave == null) return NotFound();
+            return Ok(leave);
+        }
+
+        [HttpPost("leave")]
         public async Task<IActionResult> CreateLeave(Leave leave)
         {
             await _repository.AddLeaveAsync(leave);
             return CreatedAtAction(nameof(GetById), new { id = leave.LeaveId }, leave);
         }
+        [HttpDelete("leave/{EmployeeId}")]
+        public async Task<IActionResult> DeleteLeave(int EmployeeId)
+        {
+            await _repository.DeleteLeaveAsync(EmployeeId);
+            return NoContent();
+        }
+        [HttpPut("leave/{EmployeeId}")]
+        public async Task<IActionResult> UpdateLeave(int EmployeeId, Leave leave)
+        {
+            if (EmployeeId != leave.EmployeeId) return BadRequest();
+            await _repository.UpdateLeaveAsync(leave);
+            return NoContent();
+        }
     }
 }
+
