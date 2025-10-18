@@ -13,6 +13,47 @@ public class FinanceRepository : IFinanceRepository
         _context = context;
     }
 
+    public async Task<List<AssignmentSummaryDto>> GetAssignmentSummaryAsync(int? projectIdFilter = null)
+    {
+        // 1. Start query from the ProjectAssignments DbSet
+        IQueryable<ProjectAssignment> query = _context.ProjectAssignments;
+
+        // 2. If a filter is provided, apply it here
+        if (projectIdFilter.HasValue)
+        {
+            query = query.Where(pa => pa.ProjectId == projectIdFilter.Value);
+        }
+
+        // 3. Eagerly load all required related entities in a single trip.
+        //    (This step is crucial for performance and correctly populating the .Select() logic)
+        query = query
+            .Include(pa => pa.Employee) // Load the related Employee object
+            .Include(pa => pa.Role)     // Load the related Role object
+            .Include(pa => pa.Project); // Load the related Project object
+
+        // 4. Project the result into the lightweight DTO
+        //    EF Core translates this into a single SQL query with JOINs.
+        return await query
+            .Select(pa => new AssignmentSummaryDto
+            {
+                AssignmentId = pa.AssignmentId,
+
+                // From Employee
+                EmployeeFirstName = pa.Employee.FirstName,
+
+                // From Role
+                RoleName = pa.Role.RoleName,
+
+                // From Project
+                ProjectName = pa.Project.ProjectName,
+
+                // From ProjectAssignment (the base table)
+                StartDate = pa.StartDate,
+                EndDate = pa.EndDate
+            })
+            .ToListAsync();
+    }
+
     public async Task<List<Project>> GetAllProjectsAsync()
     {
         return await _context.Projects
@@ -48,46 +89,46 @@ public class FinanceRepository : IFinanceRepository
         return workingDays;
     }
 
-    public async Task<List<Invoice>> GenerateInvoicesForProjectAsync(int projectId)
-    {
-        var project = await GetProjectWithDetailsAsync(projectId);
-        if (project == null) return new List<Invoice>();
+    //public async Task<List<Invoice>> GenerateInvoicesForProjectAsync(int projectId)
+    //{
+    //    var project = await GetProjectWithDetailsAsync(projectId);
+    //    if (project == null) return new List<Invoice>();
 
-        int workingDays = await GetWorkingDaysAsync(project.StartDate, project.EndDate);
-        var invoices = new List<Invoice>();
+    //    int workingDays = await GetWorkingDaysAsync(project.StartDate, project.EndDate);
+    //    var invoices = new List<Invoice>();
 
-        foreach (var assignment in project.ProjectAssignments)
-        {
-            var employee = assignment.Employee;
+    //    foreach (var assignment in project.ProjectAssignments)
+    //    {
+    //        var employee = assignment.Employee;
 
-            var leaves = await _context.Leaves
-                .Where(l => l.EmployeeId == employee.EmployeeId &&
-                            l.ProjectId == projectId &&
-                            l.FromDate >= DateOnly.FromDateTime(project.StartDate) &&
-                            l.ToDate <= DateOnly.FromDateTime(project.EndDate))
-                .ToListAsync();
+    //        var leaves = await _context.Leaves
+    //            .Where(l => l.EmployeeId == employee.EmployeeId &&
+    //                        l.ProjectId == projectId &&
+    //                        l.FromDate >= DateOnly.FromDateTime(project.StartDate) &&
+    //                        l.ToDate <= DateOnly.FromDateTime(project.EndDate))
+    //            .ToListAsync();
 
-            int leaveDays = leaves.Sum(l => (l.ToDate.DayNumber - l.FromDate.DayNumber + 1));
-            int workedDays = workingDays - leaveDays;
+    //        int leaveDays = leaves.Sum(l => (l.ToDate.DayNumber - l.FromDate.DayNumber + 1));
+    //        int workedDays = workingDays - leaveDays;
 
-            //invoices.Add(new Invoice
-            //{
-            //    InvoiceId = 0,
-            //    Date = DateTime.Now,
-            //    EmployeeId = employee.EmployeeId,
-            //    EmployeeName = $"{employee.FirstName} {employee.LastName}",
-            //    ProjectId = project.ProjectId,
-            //    ProjectName = project.ProjectName,
-            //    StartDate = project.StartDate,
-            //    EndDate = project.EndDate,
-            //    ClientId = project.Client.ClientId,
-            //    ClientName = project.Client.ClientName,
-            //    WorkedDays = workedDays > 0 ? workedDays : 0,
-            //    RatePerDay = project.DailyRate ?? 0,
-            //    Budget = (project.DailyRate ?? 0) * (workedDays > 0 ? workedDays : 0)
-            //});
-        }
+    //        invoices.Add(new Invoice
+    //        {
+    //            InvoiceId = 0,
+    //            Date = DateTime.Now,
+    //            EmployeeId = employee.EmployeeId,
+    //            EmployeeName = $"{employee.FirstName} {employee.LastName}",
+    //            ProjectId = project.ProjectId,
+    //            ProjectName = project.ProjectName,
+    //            StartDate = project.StartDate,
+    //            EndDate = project.EndDate,
+    //            ClientId = project.Client.ClientId,
+    //            ClientName = project.Client.ClientName,
+    //            WorkedDays = workedDays > 0 ? workedDays : 0,
+    //            RatePerDay = project.DailyRate ?? 0,
+    //            Budget = (project.DailyRate ?? 0) * (workedDays > 0 ? workedDays : 0)
+    //        });
+    //    }
 
-        return invoices;
-    }
+    //    return invoices;
+    //}
 }

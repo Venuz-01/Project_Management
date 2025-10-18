@@ -38,7 +38,9 @@ namespace RepositoriesForPMS.Interfaces
 
         /// </summary>
 
-        Task<List<Invoice>> GenerateInvoicesForProjectAsync(int projectId);
+        //Task<List<>> GenerateInvoicesForProjectAsync(int projectId);
+
+        Task<List<AssignmentSummaryDto>> GetAssignmentSummaryAsync(int? projectIdFilter = null);
 
     }
 

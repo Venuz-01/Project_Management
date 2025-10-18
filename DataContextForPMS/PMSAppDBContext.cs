@@ -24,7 +24,7 @@ namespace DataContextForPMS
 
         public DbSet<Leave> Leaves { get; set; }
 
-        public DbSet<Invoice> Invoices { get; set; }
+       // public DbSet<Invoice> Invoices { get; set; }
 
         public DbSet<Client> Clients { get; set; }
 

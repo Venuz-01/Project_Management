@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataContextForPMS.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -159,47 +159,6 @@ namespace DataContextForPMS.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Invoices",
-                columns: table => new
-                {
-                    InvoiceId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EmployeeId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectId = table.Column<int>(type: "integer", nullable: false),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    WorkedDays = table.Column<decimal>(type: "numeric", nullable: false),
-                    RatePerDay = table.Column<decimal>(type: "numeric", nullable: false),
-                    ClientId = table.Column<int>(type: "integer", nullable: false),
-                    ProjectStartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ProjectEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    InvoiceNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Invoices", x => x.InvoiceId);
-                    table.ForeignKey(
-                        name: "FK_Invoices_Clients_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "Clients",
-                        principalColumn: "ClientId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Invoices_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Invoices_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "ProjectId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Leaves",
                 columns: table => new
                 {
@@ -281,21 +240,6 @@ namespace DataContextForPMS.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Invoices_ClientId",
-                table: "Invoices",
-                column: "ClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_EmployeeId",
-                table: "Invoices",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_ProjectId",
-                table: "Invoices",
-                column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Leaves_EmployeeId",
                 table: "Leaves",
                 column: "EmployeeId");
@@ -337,9 +281,6 @@ namespace DataContextForPMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "Holidays");
-
-            migrationBuilder.DropTable(
-                name: "Invoices");
 
             migrationBuilder.DropTable(
                 name: "Leaves");

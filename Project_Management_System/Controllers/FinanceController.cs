@@ -35,43 +35,43 @@ public class FinanceController : ControllerBase
         return Ok(project);
     }
 
-    [HttpGet("GenerateInvoice/{projectId}")]
-    public async Task<ActionResult<List<Invoice>>> GenerateInvoice(int projectId)
-    {
-        var invoices = await _financeRepo.GenerateInvoicesForProjectAsync(projectId);
-        if (invoices == null || !invoices.Any()) return NotFound();
-        return Ok(invoices);
-    }
+    //[HttpGet("GenerateInvoice/{projectId}")]
+    //public async Task<ActionResult<List<Invoice>>> GenerateInvoice(int projectId)
+    //{
+    //    var invoices = await _financeRepo.GenerateInvoicesForProjectAsync(projectId);
+    //    if (invoices == null || !invoices.Any()) return NotFound();
+    //    return Ok(invoices);
+    //}
 
     [HttpGet("ExportExcel/{projectId}")]
     public async Task<IActionResult> ExportExcel(int projectId)
     {
-        var invoices = await _financeRepo.GenerateInvoicesForProjectAsync(projectId);
+        var invoices = await _financeRepo.GetAssignmentSummaryAsync(projectId);
 
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Invoices");
 
-        worksheet.Cell(1, 1).Value = "Invoice ID";
-        worksheet.Cell(1, 2).Value = "Date";
-        worksheet.Cell(1, 3).Value = "Employee Name";
-        worksheet.Cell(1, 4).Value = "Project Name";
-        worksheet.Cell(1, 5).Value = "Client Name";
-        worksheet.Cell(1, 6).Value = "Worked Days";
-        worksheet.Cell(1, 7).Value = "Rate/Day";
+        worksheet.Cell(1, 1).Value = "Employee Name";
+        worksheet.Cell(1, 2).Value = "RoleName";
+        worksheet.Cell(1, 3).Value = "ProjectName";
+        worksheet.Cell(1, 4).Value = "StartDate";
+        worksheet.Cell(1, 5).Value = "EndDate";
+    //    worksheet.Cell(1, 6).Value = "Worked Days";
+    //    worksheet.Cell(1, 7).Value = "Rate/Day";
         worksheet.Cell(1, 8).Value = "Budget";
 
         for (int i = 0; i < invoices.Count; i++)
         {
             var row = i + 2;
             var inv = invoices[i];
-            worksheet.Cell(row, 1).Value = inv.InvoiceId;
-            worksheet.Cell(row, 2).Value = inv.Date.ToString("dd-MM-yyyy HH:mm");
-            worksheet.Cell(row, 3).Value = inv.EmployeeName;
-            worksheet.Cell(row, 4).Value = inv.ProjectName;
-            worksheet.Cell(row, 5).Value = inv.ClientName;
-            worksheet.Cell(row, 6).Value = inv.WorkedDays;
-            worksheet.Cell(row, 7).Value = inv.RatePerDay;
-            worksheet.Cell(row, 8).Value = inv.Budget;
+            worksheet.Cell(row, 1).Value = inv.EmployeeFirstName;
+            worksheet.Cell(row, 2).Value = inv.RoleName;
+            worksheet.Cell(row, 3).Value = inv.ProjectName;
+            worksheet.Cell(row, 4).Value = inv.StartDate.ToString();
+            worksheet.Cell(row, 5).Value = inv.EndDate.ToString();
+    //        worksheet.Cell(row, 6).Value = inv.Date.ToString("dd-MM-yyyy HH:mm");
+    //        worksheet.Cell(row, 7).Value = inv.RatePerDay;
+    //        worksheet.Cell(row, 8).Value = inv.Budget;
         }
 
         using var stream = new MemoryStream();
@@ -84,7 +84,7 @@ public class FinanceController : ControllerBase
     [HttpGet("ExportPdf/{projectId}")]
     public async Task<IActionResult> ExportPdf(int projectId)
     {
-        var invoices = await _financeRepo.GenerateInvoicesForProjectAsync(projectId);
+        var invoices = await _financeRepo.GetAssignmentSummaryAsync(projectId);
 
         using var stream = new MemoryStream();
         var document = new PdfSharpCore.Pdf.PdfDocument();
@@ -98,10 +98,12 @@ public class FinanceController : ControllerBase
 
         foreach (var inv in invoices)
         {
-            gfx.DrawString($"Employee: {inv.EmployeeName}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
+            gfx.DrawString($"Employee: {inv.EmployeeFirstName}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
+            gfx.DrawString($"Employee: {inv.RoleName}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
             gfx.DrawString($"Project: {inv.ProjectName}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
-            gfx.DrawString($"Client: {inv.ClientName}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
-            gfx.DrawString($"Worked Days: {inv.WorkedDays}, Rate/Day: ₹{inv.RatePerDay}, Budget: ₹{inv.Budget}", font, XBrushes.Black, new XPoint(40, y)); y += 25;
+            gfx.DrawString($"Client: {inv.StartDate.ToString()}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
+            gfx.DrawString($"Client: {inv.EndDate.ToString()}", font, XBrushes.Black, new XPoint(40, y)); y += 15;
+            //gfx.DrawString($"Worked Days: {inv.WorkedDays}, Rate/Day: ₹{inv.RatePerDay}, Budget: ₹{inv.Budget}", font, XBrushes.Black, new XPoint(40, y)); y += 25;
         }
 
         document.Save(stream);
@@ -109,4 +111,10 @@ public class FinanceController : ControllerBase
 
         return File(stream.ToArray(), "application/pdf", $"Invoice_{projectId}.pdf");
     }
+        [HttpGet("projects/{projectId}/assignments")]
+        public async Task<ActionResult<IEnumerable<ProjectAssignment>>> GetProjectAssignments(int projectId)
+        {
+            var assignments = await _financeRepo.GetAssignmentSummaryAsync(projectId);
+            return Ok(assignments);
+        }
 }
