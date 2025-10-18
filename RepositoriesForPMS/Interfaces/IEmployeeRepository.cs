@@ -9,5 +9,8 @@ namespace RepositoriesForPMS.Interfaces
         Task<IEnumerable<Employee>> GetAllAsync();
         Task<Employee?> GetByIdAsync(int employeeId);
         Task<IEnumerable<Employee>> GetByRoleAsync(int roleId);
+
+        // New method to fetch employees by RoleName
+        Task<IEnumerable<Employee>> GetByRoleNameAsync(string roleName);
     }
 }

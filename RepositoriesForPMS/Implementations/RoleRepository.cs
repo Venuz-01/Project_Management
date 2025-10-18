@@ -12,6 +12,13 @@ namespace RepositoriesForPMS.Implementations
         private readonly PMSAppDBContext _context;
         public RoleRepository(PMSAppDBContext context) => _context = context;
 
-        public async Task<IEnumerable<Role>> GetAllAsync() => await _context.Roles.ToListAsync();
+        public async Task<IEnumerable<Role>> GetAllAsync() =>
+            await _context.Roles.ToListAsync();
+
+        // Fetch role by RoleName
+        public async Task<Role> GetByNameAsync(string roleName) =>
+            await _context.Roles
+                          .Include(r => r.Employee) // include employees related to role
+                          .FirstOrDefaultAsync(r => r.RoleName.ToLower() == roleName.ToLower());
     }
 }

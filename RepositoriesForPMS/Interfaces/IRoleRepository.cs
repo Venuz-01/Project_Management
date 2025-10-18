@@ -7,5 +7,8 @@ namespace RepositoriesForPMS.Interfaces
     public interface IRoleRepository
     {
         Task<IEnumerable<Role>> GetAllAsync();
+
+        // New method to get Role by Name
+        Task<Role> GetByNameAsync(string roleName);
     }
 }

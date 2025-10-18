@@ -2,6 +2,8 @@
 using ModelForPMS;
 using RepositoriesForPMS.Interfaces;
 using Project_Management_System.Filter;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Project_Management_System.Controllers
 {
@@ -27,7 +29,7 @@ namespace Project_Management_System.Controllers
             _assignmentRepo = assignmentRepo;
         }
 
-        // Get all projects with their assignments (tree structure possible on frontend)
+        // Get all projects with assignments
         [HttpGet("projects")]
         public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
@@ -43,11 +45,23 @@ namespace Project_Management_System.Controllers
             return Ok(roles);
         }
 
-        // Get employees by role for filtering when assigning
-        [HttpGet("employees/{roleId}")]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesByRole(int roleId)
+        // Get employees by RoleId
+        //[HttpGet("employees/{roleId}")]
+        //public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesByRole(int roleId)
+        //{
+        //    var employees = await _employeeRepo.GetByRoleAsync(roleId);
+        //    return Ok(employees);
+        //}
+
+        // New: Get employees by RoleName
+        [HttpGet("employees/byRoleName/{roleName}")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesByRoleName(string roleName)
         {
-            var employees = await _employeeRepo.GetByRoleAsync(roleId);
+            var role = await _roleRepo.GetByNameAsync(roleName);
+            if (role == null)
+                return NotFound($"Role '{roleName}' not found.");
+
+            var employees = role.Employee ?? new List<Employee>();
             return Ok(employees);
         }
 
@@ -63,7 +77,7 @@ namespace Project_Management_System.Controllers
             return Ok(result);
         }
 
-        // Get all assignments for a specific project
+        // Get all assignments for a project
         [HttpGet("projects/{projectId}/assignments")]
         public async Task<ActionResult<IEnumerable<ProjectAssignment>>> GetProjectAssignments(int projectId)
         {
