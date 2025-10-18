@@ -9,6 +9,6 @@ namespace RepositoriesForPMS.Interfaces
         Task<IEnumerable<Role>> GetAllAsync();
 
         // New method to get Role by Name
-        Task<Role> GetByNameAsync(string roleName);
+        Task<IEnumerable<Employee>> GetEmployeesByRoleNameAsync(string roleName);
     }
 }

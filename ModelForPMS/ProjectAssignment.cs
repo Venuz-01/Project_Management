@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ModelForPMS
@@ -14,10 +15,17 @@ namespace ModelForPMS
         [Key]
         public int AssignmentId { get; set; }
         public int ProjectId { get; set; }
+
+        [JsonIgnore]
         public Project? Project { get; set; }
+
         public int EmployeeId { get; set; }
+
+        [JsonIgnore]
         public Employee? Employee { get; set; }
+
         public int RoleId { get; set; }
+
         public Role? Role { get; set; }
         public decimal AllocationPercent { get; set; }
         public DateTime? StartDate { get; set; }

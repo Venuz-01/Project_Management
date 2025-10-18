@@ -55,13 +55,22 @@ namespace Project_Management_System.Controllers
 
         // New: Get employees by RoleName
         [HttpGet("employees/byRoleName/{roleName}")]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesByRoleName(string roleName)
+        [ProducesResponseType(typeof(IEnumerable<Employee>), 200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesByRole(string roleName)
         {
-            var role = await _roleRepo.GetByNameAsync(roleName);
-            if (role == null)
-                return NotFound($"Role '{roleName}' not found.");
+            // Input validation
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                return BadRequest("Role name cannot be empty.");
+            }
+            var employees = await _roleRepo.GetEmployeesByRoleNameAsync(roleName);
+            if (employees == null || !employees.Any())
+            {
+                return NotFound($"No employees found for the role: {roleName}.");
+            }
 
-            var employees = role.Employee ?? new List<Employee>();
+            // Return 200 OK with the list of employees
             return Ok(employees);
         }
 
@@ -86,3 +95,4 @@ namespace Project_Management_System.Controllers
         }
     }
 }
+

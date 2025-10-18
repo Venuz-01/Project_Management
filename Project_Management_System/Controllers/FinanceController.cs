@@ -9,7 +9,6 @@ using iTextSharp.text.pdf;
 using PdfSharpCore.Pdf;
 
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class FinanceController : ControllerBase

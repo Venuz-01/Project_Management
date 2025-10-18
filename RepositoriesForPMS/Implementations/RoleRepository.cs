@@ -16,9 +16,12 @@ namespace RepositoriesForPMS.Implementations
             await _context.Roles.ToListAsync();
 
         // Fetch role by RoleName
-        public async Task<Role> GetByNameAsync(string roleName) =>
-            await _context.Roles
-                          .Include(r => r.Employee) // include employees related to role
-                          .FirstOrDefaultAsync(r => r.RoleName.ToLower() == roleName.ToLower());
+        public async Task<IEnumerable<Employee>> GetEmployeesByRoleNameAsync(string roleName)
+        {
+            return await _context.Employees
+                .Where(e => e.Roles!.Any(r => r.RoleName.ToLower() == roleName.ToLower()))
+                .Include(e => e.Roles)
+                .ToListAsync();
+        }
     }
 }
