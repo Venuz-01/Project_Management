@@ -68,5 +68,11 @@ namespace RepositoriesForPMS.Implementations
                 .ThenInclude(pa => pa.Employee)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Project>> GetAllProjectAsync()
+        {
+            return await _context.Projects.ToListAsync();
+        }
+
     }
 }

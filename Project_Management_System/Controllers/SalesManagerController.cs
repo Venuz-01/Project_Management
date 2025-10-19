@@ -58,5 +58,13 @@ namespace Project_Management_System.Controllers
             var projects = await _projectRepository.GetByClientIdAsync(clientId);
             return Ok(projects);
         }
+
+        [HttpGet("projects")]
+        public async Task<ActionResult<IEnumerable<Project>>> GetAllProjects()
+        {
+            var projects = await _projectRepository.GetAllProjectAsync();
+            return Ok(projects);
+        }
+
     }
 }

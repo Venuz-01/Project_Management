@@ -10,5 +10,8 @@ namespace RepositoriesForPMS.Interfaces
         Task<Project?> UpdateAsync(int id, Project project);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Project>> GetByClientIdAsync(int clientId);
+
+        Task<IEnumerable<Project>> GetAllProjectAsync();
+
     }
 }
