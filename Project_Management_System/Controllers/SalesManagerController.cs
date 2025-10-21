@@ -1,70 +1,74 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ModelForPMS;
-using Project_Management_System.Filter;
 using RepositoriesForPMS.Interfaces;
 
-namespace Project_Management_System.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class SalesManagerController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    private readonly IClientRepository _clientRepository;
+    private readonly IProjectRepository _projectRepository;
 
-    //[AuthorizeRole("Sales Manager")]
-    public class SalesManagerController : ControllerBase
+    public SalesManagerController(IClientRepository clientRepository, IProjectRepository projectRepository)
     {
-        private readonly IClientRepository _clientRepository;
-        private readonly IProjectRepository _projectRepository;
+        _clientRepository = clientRepository;
+        _projectRepository = projectRepository;
+    }
 
-        public SalesManagerController(IClientRepository clientRepository, IProjectRepository projectRepository)
+    [HttpPost("add-client")]
+    public async Task<ActionResult<Client>> AddClient([FromBody] Client client)
+    {
+        if (client == null)
+            return BadRequest("Client data is required.");
+
+        var existingClients = await _clientRepository.GetAllAsync();
+        bool exists = existingClients.Any(c =>
+            c.ClientName.ToLower() == client.ClientName.ToLower() ||
+            c.ClientEmail.ToLower() == client.ClientEmail.ToLower());
+
+        if (exists)
+            return Conflict(new { message = "Client with this name or email already exists." });
+
+        if (client.ClientId == 0)
         {
-            _clientRepository = clientRepository;
-            _projectRepository = projectRepository;
+            client.ClientId = existingClients.Any() ? existingClients.Max(c => c.ClientId) + 1 : 1;
         }
 
-        [HttpPost("add-client")]
-        public async Task<ActionResult<Client>> AddClient(Client client)
-        {
-            var newClient = await _clientRepository.AddClientAsync(client);
-            return CreatedAtAction(nameof(GetClientById), new { id = newClient.ClientId }, newClient);
-        }
+        var newClient = await _clientRepository.AddClientAsync(client);
+        return Ok(newClient);
+    }
 
-        [HttpGet("clients")]
-        public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
-        {
-            var clients = await _clientRepository.GetAllAsync();
-            return Ok(clients);
-        }
+    [HttpGet("clients")]
+    public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
+    {
+        var clients = await _clientRepository.GetAllAsync();
+        return Ok(clients);
+    }
 
-        [HttpGet("clients/{id}")]
-        public async Task<ActionResult<Client>> GetClientById(int id)
-        {
-            var client = await _clientRepository.GetByIdAsync(id);
-            if (client == null)
-                return NotFound();
+    [HttpPost("add-project/{clientId}")]
+    public async Task<ActionResult<Project>> AddProjectToClient(int clientId, [FromBody] Project project)
+    {
+        if (project == null)
+            return BadRequest("Project data is required.");
 
-            return Ok(client);
-        }
+        var allProjects = await _projectRepository.GetAllAsync();
+        bool duplicateProject = allProjects.Any(p =>
+            p.ClientId == clientId &&
+            p.ProjectName.ToLower() == project.ProjectName.ToLower());
 
-        [HttpPost("add-project/{clientId}")]
-        public async Task<ActionResult<Project>> AddProjectToClient(int clientId, Project project)
-        {
-            project.ClientId = clientId;
-            var createdProject = await _projectRepository.AddAsync(project);
-            return CreatedAtAction(nameof(GetProjectsByClientId), new { clientId = createdProject.ClientId }, createdProject);
-        }
+        if (duplicateProject)
+            return Conflict(new { message = "Project with this name already exists for this client." });
 
-        [HttpGet("clients/{clientId}/projects")]
-        public async Task<ActionResult<IEnumerable<Project>>> GetProjectsByClientId(int clientId)
-        {
-            var projects = await _projectRepository.GetByClientIdAsync(clientId);
-            return Ok(projects);
-        }
+        project.ClientId = clientId;
+        var createdProject = await _projectRepository.AddAsync(project);
 
-        [HttpGet("projects")]
-        public async Task<ActionResult<IEnumerable<Project>>> GetAllProjects()
-        {
-            var projects = await _projectRepository.GetAllProjectAsync();
-            return Ok(projects);
-        }
+        return Ok(createdProject);
+    }
 
+    [HttpGet("clients/{clientId}/projects")]
+    public async Task<ActionResult<IEnumerable<Project>>> GetProjectsByClientId(int clientId)
+    {
+        var projects = await _projectRepository.GetByClientIdAsync(clientId);
+        return Ok(projects);
     }
 }

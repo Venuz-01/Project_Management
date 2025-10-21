@@ -19,7 +19,7 @@ namespace DataContextForPMS.Migrations
                     ClientId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ClientName = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false)
+                    ClientEmail = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,8 +93,8 @@ namespace DataContextForPMS.Migrations
                     ProjectName = table.Column<string>(type: "text", nullable: false),
                     ClientId = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DailyRate = table.Column<decimal>(type: "numeric", nullable: true)
                 },
                 constraints: table =>

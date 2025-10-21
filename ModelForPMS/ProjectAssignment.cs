@@ -22,7 +22,6 @@ namespace ModelForPMS
         public int EmployeeId { get; set; }
 
 
-
         [JsonIgnore]
         public Employee? Employee { get; set; }
 
@@ -33,5 +32,18 @@ namespace ModelForPMS
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool Billable { get; set; } = true;
+
+
+        public int GetWorkedDays()
+        {
+            if (StartDate.HasValue && EndDate.HasValue)
+            {
+                // Calculate total days between start and end date
+                int totalDays = (EndDate.Value - StartDate.Value).Days + 1;
+                // Calculate worked days based on allocation percentage
+                return (int)(totalDays * (AllocationPercent / 100));
+            }
+            return 0;
+        }
     }
 }

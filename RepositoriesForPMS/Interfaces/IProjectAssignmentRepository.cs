@@ -9,5 +9,7 @@ namespace RepositoriesForPMS.Interfaces
         Task<ProjectAssignment> AddAsync(ProjectAssignment assignment);
         Task<IEnumerable<ProjectAssignment>> GetByProjectIdAsync(int projectId);
         Task<decimal> GetTotalAllocationForEmployeeAsync(int employeeId);
+
+        Task DeleteTotalAllocationForEmployeeAsync(int employeeId);
     }
 }

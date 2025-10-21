@@ -20,6 +20,16 @@ namespace RepositoriesForPMS.Implementations
             return assignment;
         }
 
+        public async Task DeleteTotalAllocationForEmployeeAsync(int employeeId)
+        {
+            var employee = await _context.ProjectAssignments.FindAsync(employeeId);
+            if (employee != null)
+            {
+                _context.ProjectAssignments.Remove(employee);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task<IEnumerable<ProjectAssignment>> GetByProjectIdAsync(int projectId) =>
             await _context.ProjectAssignments
                 .Where(pa => pa.ProjectId == projectId)

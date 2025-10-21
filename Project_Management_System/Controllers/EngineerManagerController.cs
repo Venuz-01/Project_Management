@@ -93,6 +93,17 @@ namespace Project_Management_System.Controllers
             var assignments = await _assignmentRepo.GetByProjectIdAsync(projectId);
             return Ok(assignments);
         }
+
+
+        // ✅ Get all employees
+        [HttpGet("employees")]
+        [ProducesResponseType(typeof(IEnumerable<Employee>), 200)]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetAllEmployees()
+        {
+            var employees = await _employeeRepo.GetAllAsync();
+            return Ok(employees);
+        }
+
     }
 }
 

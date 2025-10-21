@@ -45,5 +45,12 @@ namespace RepositoriesForPMS.Implementations
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task UpdateClientAsync(Client client)
+        {
+            _context.Entry(client).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
     }
 }
+

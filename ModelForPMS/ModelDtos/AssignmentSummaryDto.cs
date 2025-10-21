@@ -15,9 +15,20 @@ public class AssignmentSummaryDto
     public string ProjectName { get; set; }
 
     // From ProjectAssignment
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
+    public DateTime? EmployeeStartDate { get; set; }
+    public DateTime? EmployeeEndDate { get; set; }
+
+    public int WorkedDays;
 
     // Optional: Include AssignmentId for tracking/editing purposes
-    public int AssignmentId { get; set; }
+    public string ClientName { get; set; }
+
+
+    public decimal? RatePerDay { get; set; }
+
+    public DateTime? ProjectStartDate;
+
+    public DateTime? ProjectEndDate;
+
+    public int Budget;
 }

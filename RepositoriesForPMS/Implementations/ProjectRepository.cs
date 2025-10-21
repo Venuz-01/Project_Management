@@ -19,7 +19,7 @@ namespace RepositoriesForPMS.Implementations
             return await _context.Projects
                 .Include(p => p.Client)
                 .Include(p => p.ProjectAssignments)
-                    .ThenInclude(pa => pa.Employee)
+                .ThenInclude(pa => pa.Employee)
                 .ToListAsync();
         }
 
@@ -28,7 +28,7 @@ namespace RepositoriesForPMS.Implementations
             return await _context.Projects
                 .Include(p => p.Client)
                 .Include(p => p.ProjectAssignments)
-                    .ThenInclude(pa => pa.Employee)
+                .ThenInclude(pa => pa.Employee)
                 .FirstOrDefaultAsync(p => p.ProjectId == id);
         }
 
@@ -36,43 +36,62 @@ namespace RepositoriesForPMS.Implementations
         {
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
-            return project;
-        }
 
-        public async Task<Project?> UpdateAsync(int id, Project project)
-        {
-            if (id != project.ProjectId)
-                return null;
+            // Re-fetch the project with navigation properties
+            var createdProject = await _context.Projects
+                .Include(p => p.Client)
+                .Include(p => p.ProjectAssignments)
+                .ThenInclude(pa => pa.Employee)
+                .FirstOrDefaultAsync(p => p.ProjectId == project.ProjectId);
 
-            _context.Entry(project).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return project;
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var project = await _context.Projects.FindAsync(id);
-            if (project == null)
-                return false;
-
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
-            return true;
+            return createdProject ?? project;
         }
 
         public async Task<IEnumerable<Project>> GetByClientIdAsync(int clientId)
         {
             return await _context.Projects
                 .Where(p => p.ClientId == clientId)
+                .Include(p => p.Client)
                 .Include(p => p.ProjectAssignments)
                 .ThenInclude(pa => pa.Employee)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Project>> GetAllProjectAsync()
+        public async Task<Project?> UpdateAsync(int id, Project project)
         {
-            return await _context.Projects.ToListAsync();
+            var existing = await _context.Projects.FindAsync(id);
+            if (existing == null)
+                return null;
+
+            existing.ProjectName = project.ProjectName;
+            existing.Description = project.Description;
+            existing.StartDate = project.StartDate;
+            existing.EndDate = project.EndDate;
+            existing.DailyRate = project.DailyRate;
+            existing.ClientId = project.ClientId;
+
+            await _context.SaveChangesAsync();
+            return existing;
         }
 
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var existing = await _context.Projects.FindAsync(id);
+            if (existing == null)
+                return false;
+
+            _context.Projects.Remove(existing);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<Project>> GetAllProjectAsync()
+        {
+            return await _context.Projects
+                .Include(p => p.Client)
+                .Include(p => p.ProjectAssignments)
+                .ThenInclude(pa => pa.Employee)
+                .ToListAsync();
+        }
     }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataContextForPMS.Migrations
 {
     [DbContext(typeof(PMSAppDBContext))]
-    [Migration("20251019024354_InitialMigration")]
+    [Migration("20251021143347_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -111,11 +111,11 @@ namespace DataContextForPMS.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ClientId"));
 
-                    b.Property<string>("ClientName")
+                    b.Property<string>("ClientEmail")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("ClientName")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -185,14 +185,14 @@ namespace DataContextForPMS.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ProjectName")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("ProjectId");

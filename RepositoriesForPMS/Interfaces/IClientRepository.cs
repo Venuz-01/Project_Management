@@ -8,5 +8,7 @@ namespace RepositoriesForPMS.Interfaces
         Task<Client?> GetByIdAsync(int id);
         Task<Client> AddClientAsync(Client client);
         Task<bool> DeleteClientAsync(int id);
+
+        Task UpdateClientAsync(Client client);
     }
 }
