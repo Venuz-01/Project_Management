@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ModelForPMS;
 using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using RepositoriesForPMS.Interfaces;
 
 [ApiController]
@@ -91,7 +92,7 @@ public class FinanceController : ControllerBase
 
     private Stream GetCompanyLogoStream()
     {
-        const string logoPath = @"C:\Users\prasa\OneDrive\Desktop\Csharp\Project3\Project_Management\abstractlogo.jpg";
+        const string logoPath = @"C:\Users\adich\Downloads\Abstractlogo.jpg";
 
         // Check if the file exists before attempting to open it.
         if (!System.IO.File.Exists(logoPath))
@@ -124,7 +125,7 @@ public class FinanceController : ControllerBase
         }
 
         using var stream = new MemoryStream();
-        var document = new PdfSharpCore.Pdf.PdfDocument();
+        var document = new PdfDocument();
         var page = document.AddPage();
         var gfx = XGraphics.FromPdfPage(page);
 
@@ -135,22 +136,25 @@ public class FinanceController : ControllerBase
         var headerBrush = XBrushes.White;
         var dataBrush = XBrushes.Black;
         var headerBackground = XBrushes.DarkSlateGray;
+        var headerLinePen = new XPen(XColors.LightGray, 1); // Pen for the separator line
+        var footerLinePen = new XPen(XColors.Black, 0.5); // Pen for the final footer line
 
         const int margin = 20;
         int y = 40;
         const int lineHeight = 20;
 
+        // --- LOGO INSERTION (New Section) ---
         try
         {
-            //Note: The logoStream returned by GetCompanyLogoStream must be disposed of,
-            //     which is handled by the `using` statement in the block below.
+            // Note: The logoStream returned by GetCompanyLogoStream must be disposed of,
+            // which is handled by the `using` statement in the block below.
             using (var logoStream = GetCompanyLogoStream())
             {
                 XImage logo = XImage.FromStream(() => logoStream);
 
-                // Define logo position and size (Top-Left corner)
+                // Define logo position and size (Top-Left corner) based on user's latest values
                 int logoWidth = 100;
-                int logoHeight = 50;
+                int logoHeight = 30;
 
                 // Draw the logo image
                 gfx.DrawImage(logo, margin, margin, logoWidth, logoHeight);
@@ -162,36 +166,96 @@ public class FinanceController : ControllerBase
         catch (Exception ex)
         {
             // Handle error if image fails to load (e.g., file not found, bad stream format)
-            // For a production app, you would log this error.
-            Console.WriteLine($"Error loading logo: {ex.Message}");
+            // The GetCompanyLogoStream now tries to catch File Not Found and use a placeholder,
+            // but we keep this outer catch for other stream/format errors.
+            Console.WriteLine($"Error during logo drawing: {ex.Message}");
             y = 40; // Fallback Y position if logo fails
         }
 
+        // --- Draw Header Separator Line ---
+        // Draw the line 5 points above the calculated 'y' (which is the title starting point)
+        int lineY = y - 5;
+        gfx.DrawLine(headerLinePen, margin, lineY, page.Width - margin, lineY);
+
+
+        var title = invoices.First().ProjectName + " Invoice Report";
+
         // --- Title and Metadata ---
-        gfx.DrawString("Assignment Invoice Report", titleFont, dataBrush, new XRect(0, y, page.Width, page.Height), XStringFormats.TopCenter);
-        y += 35;
+        // Draw the title based on the updated 'y' position (Title is centered)
+        gfx.DrawString(title, titleFont, dataBrush, new XRect(0, y, page.Width, page.Height), XStringFormats.TopCenter);
+        y += 35; // Move past the title
 
         // Display general project details above the table
         var firstInv = invoices.First();
-        gfx.DrawString($"Project: {firstInv.ProjectName} (ID: {projectId})", dataFont, dataBrush, new XPoint(margin, y));
+
+        // Use currentX to manage horizontal positioning for labels and values
+        int currentX;
+
+        // 1. Purchase Order:
+        currentX = margin;
+        const string poLabel = "Purchase Order: ";
+        const string poValue = "2453";
+        gfx.DrawString(poLabel, headerFont, dataBrush, new XPoint(currentX, y));
+        currentX += (int)gfx.MeasureString(poLabel, headerFont).Width;
+        gfx.DrawString(poValue, dataFont, dataBrush, new XPoint(currentX, y));
         y += 15;
-        gfx.DrawString($"Client: {firstInv.ClientName} | Project Budget: {firstInv.Budget:C0}", dataFont, dataBrush, new XPoint(margin, y));
-        y += 30;
+
+
+        // 3. Client: and Project Budget: (Compound Line)
+        currentX = margin;
+        const string clientLabel = "Client: ";
+        const string budgetLabel = " | Project Budget: "; // Separator included in the bold label
+
+        // Client Label (Bold)
+        gfx.DrawString(clientLabel, headerFont, dataBrush, new XPoint(currentX, y));
+        currentX += (int)gfx.MeasureString(clientLabel, headerFont).Width;
+
+        // Client Value (Regular)
+        string clientValue = firstInv.ClientName;
+        gfx.DrawString(clientValue, dataFont, dataBrush, new XPoint(currentX, y));
+        currentX += (int)gfx.MeasureString(clientValue, dataFont).Width;
+
+        // Budget Label (Includes separator) (Bold)
+        gfx.DrawString(budgetLabel, headerFont, dataBrush, new XPoint(currentX, y));
+        currentX += (int)gfx.MeasureString(budgetLabel, headerFont).Width;
+
+        // Budget Value (Regular)
+        string budgetValue = firstInv.Budget.ToString("C0");
+        gfx.DrawString(budgetValue, dataFont, dataBrush, new XPoint(currentX, y));
+        y += 15;
+
+        // 4. Contact Email:
+        currentX = margin;
+        const string emailLabel = "Contact Email: ";
+        string emailValue = firstInv.ClientEmail;
+        gfx.DrawString(emailLabel, headerFont, dataBrush, new XPoint(currentX, y));
+        currentX += (int)gfx.MeasureString(emailLabel, headerFont).Width;
+        gfx.DrawString(emailValue, dataFont, dataBrush, new XPoint(currentX, y));
+        y += 15;
+
+        // 5. Client-Billing Address:
+        currentX = margin;
+        const string addressLabel = "Client-Billing Address: ";
+        const string addressValue = "123 Business Avenue Suite 400, Metropolis, 10001";
+        gfx.DrawString(addressLabel, headerFont, dataBrush, new XPoint(currentX, y));
+        currentX += (int)gfx.MeasureString(addressLabel, headerFont).Width;
+        gfx.DrawString(addressValue, dataFont, dataBrush, new XPoint(currentX, y));
+        y += 15;
 
 
         // --- Table Column Definitions (Header, Width, Starting X Position) ---
         var columns = new List<(string Header, int Width, XStringFormat Format)>
-    {
-        ("Employee", 95, XStringFormats.CenterLeft),
-        ("Role", 80, XStringFormats.CenterLeft),
-        ("Start Date", 70, XStringFormats.CenterLeft),
-        ("End Date", 70, XStringFormats.CenterLeft),
-        ("Days", 50, XStringFormats.CenterRight),
-        ("Rate/Day", 70, XStringFormats.CenterRight),
-        ("Total Cost", 80, XStringFormats.CenterRight),
-    };
+        {
+            ("Employee", 95, XStringFormats.CenterLeft),
+            ("Role", 95, XStringFormats.CenterLeft),
+            ("Start Date", 85, XStringFormats.CenterLeft), // User's requested width
+            ("End Date", 85, XStringFormats.CenterLeft), // User's requested width
+            ("Days", 50, XStringFormats.CenterRight),
+            ("Rate/Day", 70, XStringFormats.CenterRight),
+            ("Total Cost", 80, XStringFormats.CenterRight),
+        };
 
-        int currentX = margin;
+        currentX = margin;
         int headerY = y;
 
         // --- Draw Table Header Row ---
@@ -214,8 +278,9 @@ public class FinanceController : ControllerBase
         {
             currentX = margin;
 
-            // Calculate Total Cost for the Assignment
-            var totalCost = inv.RatePerDay * (decimal)inv.WorkedDays;
+            // FIX: Safely handle nullable RatePerDay (decimal?) for calculation
+            decimal rate = inv.RatePerDay ?? 0m;
+            var totalCost = rate * (decimal)inv.WorkedDays;
 
             // Alternate row colors for readability
             if (invoices.IndexOf(inv) % 2 == 1)
@@ -234,27 +299,24 @@ public class FinanceController : ControllerBase
             gfx.DrawString(inv.RoleName, dataFont, dataBrush, new XRect(currentX, y, columns[1].Width, lineHeight), XStringFormats.CenterLeft);
             currentX += columns[1].Width;
 
-            // Col 3: EmployeeStartDate
+            // Col 3: EmployeeStartDate (FIX: Use null-conditional operator for DateTime?)
             gfx.DrawString(inv.EmployeeStartDate?.ToString("dd/MM/yyyy") ?? "N/A", dataFont, dataBrush, new XRect(currentX, y, columns[2].Width, lineHeight), XStringFormats.CenterLeft);
             currentX += columns[2].Width;
 
-            //// Col 4: EmployeeEndDate
-            //// Fixed: C# date format specifiers are case-sensitive. Use "dd-MM-yyyy" (lowercase).
-            gfx.DrawString(inv.EmployeeEndDate?.ToString("dd/MM/yyyy"), dataFont, dataBrush, new XRect(currentX, y, columns[3].Width, lineHeight), XStringFormats.CenterLeft);
+            // Col 4: EmployeeEndDate (FIX: Use null-conditional operator for DateTime?)
+            gfx.DrawString(inv.EmployeeEndDate?.ToString("dd/MM/yyyy") ?? "N/A", dataFont, dataBrush, new XRect(currentX, y, columns[3].Width, lineHeight), XStringFormats.CenterLeft);
             currentX += columns[3].Width;
 
             // Col 5: WorkedDays (Right-aligned)
             gfx.DrawString(inv.WorkedDays.ToString("F1"), dataFont, dataBrush, new XRect(currentX, y, columns[4].Width, lineHeight), XStringFormats.CenterRight);
             currentX += columns[4].Width;
 
-            // Col 6: RatePerDay (Currency, Right-aligned)
-            // Use an offset to center the currency symbol slightly better
-
-            gfx.DrawString(inv.RatePerDay?.ToString("C0"), dataFont, dataBrush, new XRect(currentX - 5, y, columns[5].Width, lineHeight), XStringFormats.CenterRight);
+            // Col 6: RatePerDay (FIX: Use null-conditional operator for decimal?)
+            gfx.DrawString(inv.RatePerDay?.ToString("C0") ?? "N/A", dataFont, dataBrush, new XRect(currentX - 5, y, columns[5].Width, lineHeight), XStringFormats.CenterRight);
             currentX += columns[5].Width;
 
             // Col 7: Total Cost (Currency, Bold, Right-aligned)
-            gfx.DrawString(totalCost?.ToString("C0"), headerFont, dataBrush, new XRect(currentX - 5, y, columns[6].Width, lineHeight), XStringFormats.CenterRight);
+            gfx.DrawString(totalCost.ToString("C0"), headerFont, dataBrush, new XRect(currentX - 5, y, columns[6].Width, lineHeight), XStringFormats.CenterRight);
             currentX += columns[6].Width;
 
 
@@ -271,11 +333,56 @@ public class FinanceController : ControllerBase
         }
 
 
+        // 1. --- Print About Sender's Company (Updated for mixed font styling) ---
+
+        // Mock Sender Company Details (Placeholder Data)
+        const string issuedByLabel = "Invoice Issued By: ";
+        const string senderName = "Mohammed Sameer Ali";
+        const string Name = "Abstract Group Ltd";
+        const string senderAddressLine1 = "1st Floor, The Coachworks, Harcourt House,";
+        const string senderAddressLine2 = "Leeds LS2 7EH, United Kingdom";
+        const string senderContact = "Contact: +91 9398158088 | sameerali.mohammed@abstract-group.com";
+
+        // Determine starting Y position for the sender block (e.g., 80 points from the bottom)
+        int footerY = (int)page.Height - 110; // Start higher to fit all lines
+        int footerX = margin;
+
+        // Draw the label in bold (headerFont)
+        gfx.DrawString(issuedByLabel, headerFont, dataBrush, new XPoint(footerX, footerY));
+
+        // Measure the width of the bold label to position the name
+        double issuedByLabelWidth = gfx.MeasureString(issuedByLabel, headerFont).Width;
+
+        // Draw the name in regular font (dataFont) immediately after the label
+        gfx.DrawString(senderName, dataFont, dataBrush, new XPoint(footerX + issuedByLabelWidth, footerY));
+
+        footerY += 15; // Move to the next line
+
+        // Draw remaining address details
+        gfx.DrawString(Name, dataFont, dataBrush, new XPoint(footerX, footerY));
+        footerY += 15;
+        gfx.DrawString(senderAddressLine1, dataFont, dataBrush, new XPoint(footerX, footerY));
+        footerY += 15;
+        gfx.DrawString(senderAddressLine2, dataFont, dataBrush, new XPoint(footerX, footerY));
+        footerY += 15;
+        gfx.DrawString(senderContact, dataFont, dataBrush, new XPoint(footerX, footerY));
+
+        // 2. --- Draw Footer's Line Immediately Below ---
+        // Place the line below the contact information, near the bottom margin.
+        int finalLineY = (int)page.Height - 20;
+        gfx.DrawLine(footerLinePen, margin, finalLineY, page.Width - margin, finalLineY);
+
+        string generatedDateText = $"Report created on {DateTime.Now:dd MMM yyyy}";
+        // Position the text 5 points below the line (finalLineY + 5), aligned to the left margin.
+        gfx.DrawString(generatedDateText, dataFont, dataBrush, new XPoint(margin, finalLineY + 5), XStringFormats.TopLeft);
+
         // --- Save and Return ---
         document.Save(stream);
         stream.Position = 0;
 
-        return File(stream.ToArray(), "application/pdf", $"Invoice_Summary_Project_{projectId}.pdf");
+        var Naming = invoices.First().ProjectName + " _Invoice_Report";
+
+        return File(stream.ToArray(), "application/pdf", Naming);
     }
 
 

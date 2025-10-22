@@ -42,7 +42,7 @@ namespace ModelForPMS
 
             {
 
-                // Calculate total days between start and end date
+                // Calculate total days between start and end date for 
 
                 int totalDays = (EndDate.Value - StartDate.Value).Days + 1;
 

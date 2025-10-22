@@ -59,6 +59,7 @@ public class FinanceRepository : IFinanceRepository
                 // Access the client via the project navigation property: pa.Project.Client
                 ClientName = pa.Project!.Client!.ClientName, // Assuming Client has a 'ClientName' property
 
+                ClientEmail = pa.Project!.Client!.ClientEmail,
                 // From ProjectAssignment (the base table)
                 EmployeeStartDate = pa.StartDate,
                 EmployeeEndDate = pa.EndDate,
@@ -113,4 +114,6 @@ public class FinanceRepository : IFinanceRepository
 
         return workingDays;
     }
+
+
 }

@@ -23,6 +23,8 @@ public class AssignmentSummaryDto
     // Optional: Include AssignmentId for tracking/editing purposes
     public string ClientName { get; set; }
 
+    public string ClientEmail { get; set; }
+
 
     public decimal? RatePerDay { get; set; }
 
