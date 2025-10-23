@@ -30,4 +30,8 @@ public class Leave
     [MaxLength(255)]
     public string? Reason { get; set; }
 
+    public int AssignmentId { get; set; }
+
+    public ICollection<ProjectAssignment>? ProjectAssignments{ get; set; }
+
 }

@@ -15,8 +15,8 @@ public class AssignmentSummaryDto
     public string ProjectName { get; set; }
 
     // From ProjectAssignment
-    public DateTime? EmployeeStartDate { get; set; }
-    public DateTime? EmployeeEndDate { get; set; }
+    public DateOnly? EmployeeStartDate { get; set; }
+    public DateOnly? EmployeeEndDate { get; set; }
 
     public int WorkedDays;
 
@@ -25,12 +25,18 @@ public class AssignmentSummaryDto
 
     public string ClientEmail { get; set; }
 
-
+    public decimal AllocationPercent { get; set; }
     public decimal? RatePerDay { get; set; }
 
-    public DateTime? ProjectStartDate;
+    public DateOnly? ProjectStartDate;
 
-    public DateTime? ProjectEndDate;
+    public DateOnly? ProjectEndDate;
 
     public int Budget;
+
+    public int HolidayCount { get; set; }
+
+    public int LeaveCount { get; set; }
+
+   
 }

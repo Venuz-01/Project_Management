@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataContextForPMS.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,7 +48,8 @@ namespace DataContextForPMS.Migrations
                     HolidayId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false)
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    AssignmentId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -93,8 +94,8 @@ namespace DataContextForPMS.Migrations
                     ProjectName = table.Column<string>(type: "text", nullable: false),
                     ClientId = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: true),
                     DailyRate = table.Column<decimal>(type: "numeric", nullable: true)
                 },
                 constraints: table =>
@@ -169,7 +170,8 @@ namespace DataContextForPMS.Migrations
                     LeaveType = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     FromDate = table.Column<DateOnly>(type: "date", nullable: false),
                     ToDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Reason = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                    Reason = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    AssignmentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -197,9 +199,11 @@ namespace DataContextForPMS.Migrations
                     EmployeeId = table.Column<int>(type: "integer", nullable: false),
                     RoleId = table.Column<int>(type: "integer", nullable: false),
                     AllocationPercent = table.Column<decimal>(type: "numeric", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Billable = table.Column<bool>(type: "boolean", nullable: false)
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    Billable = table.Column<bool>(type: "boolean", nullable: false),
+                    LeaveId = table.Column<int>(type: "integer", nullable: false),
+                    HolidayId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -224,6 +228,54 @@ namespace DataContextForPMS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "HolidayProjectAssignment",
+                columns: table => new
+                {
+                    HolidaysHolidayId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectAssignmentsAssignmentId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HolidayProjectAssignment", x => new { x.HolidaysHolidayId, x.ProjectAssignmentsAssignmentId });
+                    table.ForeignKey(
+                        name: "FK_HolidayProjectAssignment_Holidays_HolidaysHolidayId",
+                        column: x => x.HolidaysHolidayId,
+                        principalTable: "Holidays",
+                        principalColumn: "HolidayId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_HolidayProjectAssignment_ProjectAssignments_ProjectAssignme~",
+                        column: x => x.ProjectAssignmentsAssignmentId,
+                        principalTable: "ProjectAssignments",
+                        principalColumn: "AssignmentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LeaveProjectAssignment",
+                columns: table => new
+                {
+                    LeavesLeaveId = table.Column<int>(type: "integer", nullable: false),
+                    ProjectAssignmentsAssignmentId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeaveProjectAssignment", x => new { x.LeavesLeaveId, x.ProjectAssignmentsAssignmentId });
+                    table.ForeignKey(
+                        name: "FK_LeaveProjectAssignment_Leaves_LeavesLeaveId",
+                        column: x => x.LeavesLeaveId,
+                        principalTable: "Leaves",
+                        principalColumn: "LeaveId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LeaveProjectAssignment_ProjectAssignments_ProjectAssignment~",
+                        column: x => x.ProjectAssignmentsAssignmentId,
+                        principalTable: "ProjectAssignments",
+                        principalColumn: "AssignmentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_EmployeeRole_RolesRoleId",
                 table: "EmployeeRole",
@@ -238,6 +290,16 @@ namespace DataContextForPMS.Migrations
                 name: "IX_EmployeeRoles_RoleId",
                 table: "EmployeeRoles",
                 column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HolidayProjectAssignment_ProjectAssignmentsAssignmentId",
+                table: "HolidayProjectAssignment",
+                column: "ProjectAssignmentsAssignmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LeaveProjectAssignment_ProjectAssignmentsAssignmentId",
+                table: "LeaveProjectAssignment",
+                column: "ProjectAssignmentsAssignmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Leaves_EmployeeId",
@@ -280,6 +342,15 @@ namespace DataContextForPMS.Migrations
                 name: "EmployeeRoles");
 
             migrationBuilder.DropTable(
+                name: "HolidayProjectAssignment");
+
+            migrationBuilder.DropTable(
+                name: "LeaveProjectAssignment");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "Holidays");
 
             migrationBuilder.DropTable(
@@ -287,9 +358,6 @@ namespace DataContextForPMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProjectAssignments");
-
-            migrationBuilder.DropTable(
-                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Employees");

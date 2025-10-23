@@ -29,19 +29,26 @@ namespace ModelForPMS
 
         public Role? Role { get; set; }
         public decimal AllocationPercent { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
         public bool Billable { get; set; } = true;
 
-
+        [JsonIgnore]
+        public int LeaveId { get; set; }
+        [JsonIgnore]
+        public ICollection<Leave>? Leaves { get; set; }
+        [JsonIgnore]
+        public int HolidayId { get; set; }
+        [JsonIgnore]
+        public ICollection<Holiday>? Holidays { get; set; }
         public int GetWorkedDays()
         {
             if (StartDate.HasValue && EndDate.HasValue)
             {
                 // Calculate total days between start and end date
-                int totalDays = (EndDate.Value - StartDate.Value).Days + 1;
+                int totalDays = (EndDate.Value.DayNumber - StartDate.Value.DayNumber) ;
                 // Calculate worked days based on allocation percentage
-                return (int)(totalDays * (AllocationPercent / 100));
+                return (int)(totalDays );
             }
             return 0;
         }

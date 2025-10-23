@@ -24,9 +24,9 @@ namespace ModelForPMS
 
         public required string Description { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public DateOnly? StartDate { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateOnly? EndDate { get; set; }
 
         public decimal? DailyRate { get; set; }
 
@@ -44,7 +44,7 @@ namespace ModelForPMS
 
                 // Calculate total days between start and end date for 
 
-                int totalDays = (EndDate.Value - StartDate.Value).Days + 1;
+                int totalDays = (EndDate.Value.DayNumber - StartDate.Value.DayNumber)+1;
 
                 // Calculate worked days based on allocation percentage
 

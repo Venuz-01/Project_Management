@@ -15,67 +15,54 @@ public class FinanceRepository : IFinanceRepository
 
     public async Task<List<AssignmentSummaryDto>> GetAssignmentSummaryAsync(int? projectIdFilter = null)
     {
-        // 1. Start query from the ProjectAssignments DbSet
+        // Start with the base query
         IQueryable<ProjectAssignment> query = _context.ProjectAssignments;
 
-        // 2. If a filter is provided, apply it here
+        // Apply project filter
         if (projectIdFilter.HasValue)
         {
             query = query.Where(pa => pa.ProjectId == projectIdFilter.Value);
         }
 
-        // 3. Eagerly load all required related entities in a single trip.
-        //    ⚠️ NOTE: For a Projection Query (using .Select()), 
-        //    the Include/ThenInclude lines are OPTIONAL as EF Core will generate the JOINs anyway. 
-        //    I'm commenting them out to show the most efficient, projection-based approach.
-        /*
-        query = query
-            .Include(pa => pa.Employee) 
-            .Include(pa => pa.Role)     
-            // To include Client, we would chain ThenInclude off the Project:
-            // .Include(pa => pa.Project).ThenInclude(p => p.Client); 
-            .Include(pa => pa.Project); 
-        */
-
-        // 4. Project the result into the lightweight DTO.
-        //    Since ProjectAssignment has a Project navigation property (pa.Project), 
-        //    and Project has a Client navigation property (pa.Project.Client), 
-        //    we can access the ClientName property by simply chaining the navigations.
         return await query
             .Select(pa => new AssignmentSummaryDto
             {
-                // From Employee
-                // NOTE: Employee must have a 'FirstName' property for this to compile.
+                // --- Standard Mappings (Assumed working) ---
                 EmployeeFirstName = pa.Employee!.FirstName,
-
-                // From Role
-                // NOTE: Role must have a 'RoleName' property for this to compile.
                 RoleName = pa.Role!.RoleName,
-
-                // From Project
                 ProjectName = pa.Project!.ProjectName,
-
-                // From Project -> Client (The required step)
-                // Access the client via the project navigation property: pa.Project.Client
-                ClientName = pa.Project!.Client!.ClientName, // Assuming Client has a 'ClientName' property
-
+                ClientName = pa.Project!.Client!.ClientName,
                 ClientEmail = pa.Project!.Client!.ClientEmail,
-                // From ProjectAssignment (the base table)
+
+                AllocationPercent = pa.AllocationPercent,
                 EmployeeStartDate = pa.StartDate,
                 EmployeeEndDate = pa.EndDate,
-
-                // The .GetWorkedDays() C# method can be called here if it's simple enough 
-                // to be translated by EF Core, but it's often safer to calculate it client-side.
-                // For this example, we'll keep your original code which works if EF Core supports translation.
                 WorkedDays = pa.GetWorkedDays(),
 
                 RatePerDay = pa.Project!.DailyRate,
-
                 ProjectStartDate = pa.Project!.StartDate,
-
                 ProjectEndDate = pa.Project!.EndDate,
+                Budget = pa.Project!.GetBudget(),
 
-                Budget = pa.Project!.GetBudget()
+                // ----------------------------------------------------
+                // 1. Calculate Holiday Count using a Correlated Subquery
+                // Filters the global Holidays table by the assignment's start/end dates.
+                // Note: We use the ternary operator to handle null dates safely.
+                HolidayCount = pa.StartDate.HasValue && pa.EndDate.HasValue
+                    ? _context.Holidays.Count(h =>
+                        h.Date >= pa.StartDate.Value &&
+                        h.Date <= pa.EndDate.Value)
+                    : 0,
+
+                // 2. Calculate Leave Count using a Correlated Subquery
+                // Filters the Leaves table by EmployeeId AND the assignment's date range.
+                LeaveCount = pa.StartDate.HasValue && pa.EndDate.HasValue
+                    ? _context.Leaves.Count(l =>
+                        l.EmployeeId == pa.EmployeeId && // Filter by the assigned Employee
+                        l.FromDate <= pa.EndDate.Value && // Leave starts before assignment ends
+                        l.ToDate >= pa.StartDate.Value)   // Leave ends after assignment starts (Overlap condition)
+                    : 0
+                // ----------------------------------------------------
             })
             .ToListAsync();
     }
