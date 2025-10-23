@@ -259,7 +259,7 @@ public class FinanceController : ControllerBase
             ("Start Date", 90, XStringFormats.Center),    // Col 1: Center-Aligned
             ("End Date", 85, XStringFormats.Center),      // Col 2: Center-Aligned
             ("Days", 40, XStringFormats.Center),          // Col 3: Center-Aligned
-            ("Worked Percent", 100, XStringFormats.Center), // Col 4: Center-Aligned
+            ("Allocation", 100, XStringFormats.Center), // Col 4: Center-Aligned
             ("Rate/Day", 70, XStringFormats.Center),      // Col 5: Center-Aligned
             ("Cost", 80, XStringFormats.CenterRight),     // Col 6: Right-Aligned
         };
