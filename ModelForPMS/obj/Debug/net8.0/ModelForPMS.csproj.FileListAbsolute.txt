@@ -1,0 +1,12 @@
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\bin\Debug\net8.0\ModelForPMS.deps.json
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\bin\Debug\net8.0\ModelForPMS.dll
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\bin\Debug\net8.0\ModelForPMS.pdb
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.AssemblyInfoInputs.cache
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.AssemblyInfo.cs
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.csproj.CoreCompileInputs.cache
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.sourcelink.json
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.dll
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\refint\ModelForPMS.dll
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ModelForPMS.pdb
+C:\Users\mdsam\OneDrive\Desktop\proj\backend_proj\ModelForPMS\obj\Debug\net8.0\ref\ModelForPMS.dll
