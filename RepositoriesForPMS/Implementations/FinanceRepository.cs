@@ -42,7 +42,7 @@ public class FinanceRepository : IFinanceRepository
                 RatePerDay = pa.Project!.DailyRate,
                 ProjectStartDate = pa.Project!.StartDate,
                 ProjectEndDate = pa.Project!.EndDate,
-                Budget = pa.Project!.GetBudget(),
+                //Budget = pa.Project!.GetBudget(),
 
                 // ----------------------------------------------------
                 // 1. Calculate Holiday Count using a Correlated Subquery
