@@ -28,9 +28,9 @@ public class AssignmentSummaryDto
     public decimal AllocationPercent { get; set; }
     public decimal? RatePerDay { get; set; }
 
-    public DateOnly? ProjectStartDate;
+    public DateTime? ProjectStartDate;
 
-    public DateOnly? ProjectEndDate;
+    public DateTime? ProjectEndDate;
 
     public int Budget;
 
