@@ -24,9 +24,9 @@ namespace ModelForPMS
 
         public required string Description { get; set; }
 
-        public DateOnly? StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
-        public DateOnly? EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         public decimal? DailyRate { get; set; }
 
@@ -34,27 +34,27 @@ namespace ModelForPMS
 
         public ICollection<ProjectAssignment>? ProjectAssignments { get; set; }
 
-        public int GetBudget()
+        // public int GetBudget()
 
-        {
+        // {
 
-            if (StartDate.HasValue && EndDate.HasValue)
+        //     if (StartDate.HasValue && EndDate.HasValue)
 
-            {
+        //     {
 
-                // Calculate total days between start and end date for 
+        //         // Calculate total days between start and end date for 
 
-                int totalDays = (EndDate.Value.DayNumber - StartDate.Value.DayNumber)+1;
+        //         int totalDays = (EndDate.Value.DayNumber - StartDate.Value.DayNumber)+1;
 
-                // Calculate worked days based on allocation percentage
+        //         // Calculate worked days based on allocation percentage
 
-                return (int)(totalDays * DailyRate);
+        //         return (int)(totalDays * DailyRate);
 
-            }
+        //     }
 
-            return 0;
+        //     return 0;
 
-        }
+        // }
 
 
     }
